@@ -349,11 +349,9 @@ const Chat: React.FC = () => {
                                     setIsThinking(true);
                                     setThinkingContent(prev => prev + data.data);
                                 } else if (data.type === 'content') {
-                                    // 收到正式内容时，折叠思考
-                                    if (isThinking) {
-                                        setIsThinking(false);
-                                        setThinkingCollapsed(true);
-                                    }
+                                    // 收到正式内容时，立即折叠思考
+                                    setIsThinking(false);
+                                    setThinkingCollapsed(true);
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         content: prev.content + data.data,
