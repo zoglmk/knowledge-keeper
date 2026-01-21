@@ -4,8 +4,7 @@
 
 .chat-page {
     display: flex;
-    height: 100%;
-    min-height: calc(100vh - 60px);
+    height: 100vh;
 }
 
 /* 侧边栏 */
@@ -22,11 +21,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
-    margin: var(--space-md);
-    padding: var(--space-md);
+    gap: var(--space-xs);
+    margin: var(--space-sm) var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
+    font-size: 0.875rem;
     font-weight: 500;
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
@@ -107,7 +107,9 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    height: calc(100vh - 60px);
+    height: 100%;
+    position: relative;
+    /* 为悬浮输入框提供定位锚点 */
     overflow: hidden;
 }
 
@@ -117,6 +119,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: var(--space-xl);
+    padding-bottom: 120px;
+    /* 为悬浮输入框留出空间 */
     scroll-behavior: smooth;
 }
 
@@ -491,19 +495,26 @@
     font-size: 0.9375rem;
 }
 
-/* 输入区域 */
+/* 输入区域 - 悬浮效果 */
 .chat-page__input-area {
-    padding: var(--space-md) var(--space-xl);
-    border-top: 1px solid var(--color-border);
-    background: var(--color-bg-secondary);
-    flex-shrink: 0;
+    position: absolute;
+    bottom: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - var(--space-xl) * 2);
+    max-width: 800px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    z-index: 10;
 }
 
 .chat-page__input-options {
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-xs);
+    padding-left: var(--space-sm);
 }
 
 .chat-page__toggle {
@@ -513,6 +524,14 @@
     font-size: 0.8125rem;
     color: var(--color-text-secondary);
     cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.chat-page__toggle:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
 }
 
 .chat-page__toggle input {
@@ -521,20 +540,24 @@
     accent-color: var(--color-primary);
 }
 
+/* 输入框容器 - 悬浮胶囊 */
 .chat-page__input-wrapper {
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
-    padding: var(--space-sm);
-    background: var(--color-bg-tertiary);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    transition: all var(--transition-fast);
+    border-radius: 24px;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .chat-page__input-wrapper:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
 .chat-page__input {
@@ -554,26 +577,36 @@
     color: var(--color-text-muted);
 }
 
+/* 发送按钮 */
 .chat-page__send-btn {
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
-    border-radius: var(--radius-md);
+    border-radius: 50%;
+    /* 圆形按钮 */
     transition: all var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    flex-shrink: 0;
 }
 
 .chat-page__send-btn:hover:not(:disabled) {
-    background: var(--color-primary-dark);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.chat-page__send-btn:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 .chat-page__send-btn:disabled {
     background: var(--color-bg-tertiary);
     color: var(--color-text-muted);
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* 思考过程组件（内嵌在消息中） */
