@@ -619,18 +619,44 @@
     font-size: 0.625rem;
     color: var(--color-text-muted);
     opacity: 0.6;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.thinking-block__toggle--open {
+    transform: rotate(90deg);
+}
+
+/* 内容包装器 - 用于动画 */
+.thinking-block__content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+
+.thinking-block--collapsed .thinking-block__content-wrapper {
+    grid-template-rows: 0fr;
+    opacity: 0;
 }
 
 .thinking-block__content {
-    padding: var(--space-sm);
+    min-height: 0;
+    overflow: hidden;
+    padding: 0 var(--space-sm);
     font-size: 0.75rem;
     color: var(--color-text-secondary);
     line-height: 1.5;
-    max-height: 200px;
-    overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
     background: var(--color-bg-primary);
+    transition: padding 0.3s ease;
+}
+
+.thinking-block__content-wrapper:not(.thinking-block--collapsed .thinking-block__content-wrapper) .thinking-block__content {
+    padding: var(--space-sm);
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 /* 思考中状态 - 无高度限制 */

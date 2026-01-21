@@ -31,7 +31,7 @@ const ThinkingBlock: React.FC<{
     if (!content) return null;
 
     return (
-        <div className={`thinking-block ${isThinking ? 'thinking-block--active' : ''}`}>
+        <div className={`thinking-block ${isThinking ? 'thinking-block--active' : ''} ${isCollapsed ? 'thinking-block--collapsed' : ''}`}>
             <div className="thinking-block__header" onClick={onToggle}>
                 <span className="thinking-block__icon">
                     {isThinking ? <Loader2 size={12} className="animate-spin" /> : '💭'}
@@ -39,15 +39,15 @@ const ThinkingBlock: React.FC<{
                 <span className="thinking-block__title">
                     {isThinking ? '思考中...' : '思考过程'}
                 </span>
-                <span className="thinking-block__toggle">
-                    {isCollapsed ? '▶' : '▼'}
+                <span className={`thinking-block__toggle ${isCollapsed ? '' : 'thinking-block__toggle--open'}`}>
+                    ▶
                 </span>
             </div>
-            {!isCollapsed && (
+            <div className="thinking-block__content-wrapper">
                 <div className="thinking-block__content">
                     {content}
                 </div>
-            )}
+            </div>
         </div>
     );
 };
