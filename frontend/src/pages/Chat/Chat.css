@@ -1,5 +1,5 @@
 /**
- * 聊天页面样式
+ * 聊天页面样式 - Premium Design
  */
 
 .chat-page {
@@ -10,8 +10,8 @@
 /* 侧边栏 */
 .chat-page__sidebar {
     width: 280px;
-    background: var(--color-bg-secondary);
-    border-right: 1px solid var(--color-border);
+    background: linear-gradient(180deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+    border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -21,20 +21,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-xs);
-    margin: var(--space-sm) var(--space-md);
-    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
+    margin: var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: var(--text-sm);
+    font-weight: 600;
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .chat-page__new-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.chat-page__new-btn:active {
+    transform: translateY(0);
 }
 
 .chat-page__conversations {
@@ -132,31 +137,38 @@
     justify-content: center;
     height: 100%;
     text-align: center;
-    padding: var(--space-xl);
+    padding: var(--space-2xl);
 }
 
 .chat-page__welcome-icon {
-    width: 96px;
-    height: 96px;
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(34, 211, 238, 0.2) 100%);
-    border-radius: 50%;
-    color: var(--color-primary);
-    margin-bottom: var(--space-lg);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(34, 211, 238, 0.15) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-xl);
+    color: var(--color-primary-light);
+    margin-bottom: var(--space-xl);
+    font-size: 2rem;
+    box-shadow: var(--shadow-glow-sm);
 }
 
 .chat-page__welcome h2 {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
+    font-weight: 700;
     color: var(--color-text-primary);
     margin-bottom: var(--space-sm);
+    letter-spacing: -0.01em;
 }
 
 .chat-page__welcome p {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-xl);
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+    margin-bottom: var(--space-2xl);
     max-width: 400px;
+    line-height: 1.6;
 }
 
 .chat-page__suggestions {
@@ -164,28 +176,33 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-sm);
+    max-width: 600px;
 }
 
 .chat-page__suggestions button {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-lg);
+    background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
     color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     transition: all var(--transition-fast);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .chat-page__suggestions button:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    border-color: var(--color-border-active);
+    color: var(--color-primary-light);
+    background: var(--color-bg-hover);
+    transform: translateY(-1px);
 }
 
 /* 消息气泡 */
 .message {
     display: flex;
     gap: var(--space-md);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-xl);
     animation: fadeIn 0.3s ease;
 }
 
@@ -203,35 +220,45 @@
     border-radius: var(--radius-md);
     flex-shrink: 0;
     font-size: 1rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .message--assistant .message__avatar {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
     color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.message--user .message__avatar {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
 }
 
 .message__content {
-    max-width: 70%;
+    max-width: 75%;
 }
 
 .message__bubble {
     padding: var(--space-lg) var(--space-xl);
     border-radius: var(--radius-lg);
-    font-size: 0.9375rem;
-    line-height: 1.9;
+    font-size: var(--text-sm);
+    line-height: 1.8;
 }
 
 .message--user .message__bubble {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
     border-bottom-right-radius: var(--radius-sm);
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.25);
 }
 
 .message--assistant .message__bubble {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--glass-border);
     color: var(--color-text-primary);
     border-bottom-left-radius: var(--radius-sm);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .message__bubble--loading {

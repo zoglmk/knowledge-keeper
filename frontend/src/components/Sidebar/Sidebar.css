@@ -1,5 +1,5 @@
 /**
- * 侧边栏样式
+ * 侧边栏样式 - Premium Design
  */
 
 .sidebar {
@@ -7,8 +7,8 @@
     left: 0;
     top: 0;
     bottom: 0;
-    background: var(--color-bg-secondary);
-    border-right: 1px solid var(--color-border);
+    background: linear-gradient(180deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+    border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
     transition: width var(--transition-normal);
@@ -23,18 +23,30 @@
     width: 72px;
 }
 
-/* Logo */
+/* Logo - 更大更精致 */
 .sidebar__logo {
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    padding: var(--space-lg);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-lg) var(--space-lg);
+    border-bottom: 1px solid var(--glass-border);
+    position: relative;
+}
+
+.sidebar__logo::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: var(--space-lg);
+    right: var(--space-lg);
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-primary), transparent);
+    opacity: 0.3;
 }
 
 .sidebar__logo-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -42,15 +54,17 @@
     border-radius: var(--radius-md);
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-size: 1.125rem;
 }
 
 .sidebar__logo-text {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 700;
     color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
+    letter-spacing: -0.01em;
     animation: fadeIn 0.3s ease;
 }
 
@@ -69,8 +83,8 @@
     gap: var(--space-md);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
     font-weight: 500;
     transition: all var(--transition-fast);
     white-space: nowrap;
@@ -83,7 +97,7 @@
 }
 
 .sidebar__nav-item--active {
-    background: rgba(99, 102, 241, 0.12);
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%);
     color: var(--color-primary-light);
 }
 
@@ -94,9 +108,20 @@
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 20px;
-    background: var(--color-primary);
-    border-radius: 0 2px 2px 0;
+    height: 18px;
+    background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+}
+
+.sidebar__nav-item svg {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.sidebar__nav-item:hover svg,
+.sidebar__nav-item--active svg {
+    opacity: 1;
 }
 
 /* 折叠按钮 */
@@ -106,17 +131,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
     transition: all var(--transition-fast);
 }
 
 .sidebar__toggle:hover {
     background: var(--color-bg-hover);
     color: var(--color-text-primary);
-    border-color: var(--color-primary);
+    border-color: var(--color-border-active);
 }
 
 /* 响应式 */
@@ -128,6 +153,6 @@
     .sidebar--open {
         transform: translateX(0);
         width: 280px;
-        box-shadow: var(--shadow-lg);
+        box-shadow: var(--shadow-xl);
     }
 }
