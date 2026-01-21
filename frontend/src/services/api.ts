@@ -220,3 +220,20 @@ export const searchApi = {
     // 获取统计信息
     stats: () => api.get<any, SearchStats>('/search/stats'),
 };
+
+// ==================== 配置相关 API ====================
+
+export interface ConfigResponse {
+    provider: string;
+    has_api_key: boolean;
+    message: string;
+}
+
+export const configApi = {
+    // 获取配置
+    get: () => api.get<any, ConfigResponse>('/config'),
+
+    // 更新配置
+    update: (data: { provider: string; api_key: string }) =>
+        api.post<any, ConfigResponse>('/config', data),
+};

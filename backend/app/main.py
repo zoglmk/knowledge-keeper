@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import settings
 from .core.database import init_db, close_db
-from .api import bookmarks_router, tags_router, chat_router, search_router
+from .api import bookmarks_router, tags_router, chat_router, search_router, config_router
 
 
 @asynccontextmanager
@@ -53,6 +53,7 @@ app.include_router(bookmarks_router, prefix="/api")
 app.include_router(tags_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(search_router, prefix="/api")
+app.include_router(config_router, prefix="/api")
 
 
 @app.get("/")

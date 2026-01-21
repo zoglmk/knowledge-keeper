@@ -14,15 +14,43 @@ import {
     Sun,
     Moon,
     Monitor,
+    Eye,
+    EyeOff,
+    Check,
+    Loader2,
 } from 'lucide-react';
+import { useAppStore } from '../../stores';
+import { configApi } from '../../services/api';
 import './Settings.css';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
+interface AIProvider {
+    id: string;
+    name: string;
+    description: string;
+}
+
+const AI_PROVIDERS: AIProvider[] = [
+    { id: 'doubao', name: '豆包', description: '字节跳动火山引擎' },
+    { id: 'openai', name: 'OpenAI', description: 'GPT-4 / GPT-3.5' },
+    { id: 'claude', name: 'Claude', description: 'Anthropic Claude' },
+    { id: 'gemini', name: 'Gemini', description: 'Google AI' },
+    { id: 'deepseek', name: 'Deepseek', description: 'Deepseek AI' },
+];
+
 const Settings: React.FC = () => {
+    const { showNotification } = useAppStore();
     const [theme, setTheme] = useState<ThemeMode>(() => {
         return (localStorage.getItem('theme') as ThemeMode) || 'system';
     });
+
+    // AI 配置状态
+    const [selectedProvider, setSelectedProvider] = useState('doubao');
+    const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [hasApiKey, setHasApiKey] = useState(false);
 
     // 应用主题
     useEffect(() => {
@@ -37,8 +65,47 @@ const Settings: React.FC = () => {
         localStorage.setItem('theme', theme);
     }, [theme]);
 
+    // 加载已保存的配置
+    useEffect(() => {
+        loadConfig();
+    }, []);
+
+    const loadConfig = async () => {
+        try {
+            const response = await configApi.get();
+            setSelectedProvider(response.provider);
+            setHasApiKey(response.has_api_key);
+        } catch (error) {
+            // 使用默认值
+        }
+    };
+
     const handleThemeChange = (newTheme: ThemeMode) => {
         setTheme(newTheme);
+    };
+
+    const handleSaveConfig = async () => {
+        if (!apiKey.trim()) {
+            showNotification('error', '请输入 API Key');
+            return;
+        }
+
+        setSaving(true);
+        try {
+            // 调用后端 API 保存到 .env 文件
+            const response = await configApi.update({
+                provider: selectedProvider,
+                api_key: apiKey
+            });
+
+            setHasApiKey(true);
+            setApiKey(''); // 清空输入框
+            showNotification('success', response.message);
+        } catch (error: any) {
+            showNotification('error', error?.response?.data?.message || '保存失败');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
@@ -59,24 +126,83 @@ const Settings: React.FC = () => {
                         <h2>AI 模型</h2>
                     </div>
                     <div className="settings-section__content">
+                        {/* 模型选择 */}
                         <div className="settings-item">
                             <div className="settings-item__info">
-                                <span className="settings-item__label">当前模型</span>
-                                <span className="settings-item__desc">用于生成摘要、标签和对话</span>
-                            </div>
-                            <div className="settings-item__value">
-                                <span className="settings-badge settings-badge--primary">豆包 (Doubao)</span>
+                                <span className="settings-item__label">AI 服务提供商</span>
+                                <span className="settings-item__desc">选择用于生成摘要、标签和对话的模型</span>
                             </div>
                         </div>
+                        <div className="provider-selector">
+                            {AI_PROVIDERS.map((provider) => (
+                                <button
+                                    key={provider.id}
+                                    className={`provider-option ${selectedProvider === provider.id ? 'provider-option--active' : ''}`}
+                                    onClick={() => setSelectedProvider(provider.id)}
+                                >
+                                    <span className="provider-option__name">{provider.name}</span>
+                                    <span className="provider-option__desc">{provider.description}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* API Key 输入 */}
                         <div className="settings-item">
                             <div className="settings-item__info">
-                                <span className="settings-item__label">API 配置</span>
-                                <span className="settings-item__desc">在后端 .env 文件中配置</span>
+                                <span className="settings-item__label">
+                                    API 密钥
+                                    {hasApiKey && (
+                                        <span className="settings-badge settings-badge--success" style={{ marginLeft: '8px' }}>
+                                            ✓ 已配置
+                                        </span>
+                                    )}
+                                </span>
+                                <span className="settings-item__desc">
+                                    输入 {AI_PROVIDERS.find(p => p.id === selectedProvider)?.name} 的 API Key
+                                </span>
                             </div>
-                            <a href="#" className="settings-link">
-                                查看配置说明
-                                <ExternalLink size={14} />
-                            </a>
+                        </div>
+                        <div className="api-key-input">
+                            <div className="api-key-input__field">
+                                <input
+                                    type={showApiKey ? 'text' : 'password'}
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    placeholder={hasApiKey ? "输入新的 API Key 可覆盖..." : "请输入 API Key..."}
+                                />
+                                <button
+                                    type="button"
+                                    className="api-key-input__toggle"
+                                    onClick={() => setShowApiKey(!showApiKey)}
+                                >
+                                    {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleSaveConfig}
+                                disabled={saving}
+                            >
+                                {saving ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        保存中...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Check size={16} />
+                                        保存配置
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="settings-item">
+                            <div className="settings-item__info">
+                                <span className="settings-item__desc" style={{ color: 'var(--color-text-muted)' }}>
+                                    💡 提示：配置会保存到后端 .env 文件，保存后需重启后端服务生效
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -127,21 +253,21 @@ const Settings: React.FC = () => {
                                 className={`theme-option ${theme === 'system' ? 'theme-option--active' : ''}`}
                                 onClick={() => handleThemeChange('system')}
                             >
-                                <Monitor size={20} />
+                                <Monitor size={16} />
                                 <span>跟随系统</span>
                             </button>
                             <button
                                 className={`theme-option ${theme === 'light' ? 'theme-option--active' : ''}`}
                                 onClick={() => handleThemeChange('light')}
                             >
-                                <Sun size={20} />
+                                <Sun size={16} />
                                 <span>亮色</span>
                             </button>
                             <button
                                 className={`theme-option ${theme === 'dark' ? 'theme-option--active' : ''}`}
                                 onClick={() => handleThemeChange('dark')}
                             >
-                                <Moon size={20} />
+                                <Moon size={16} />
                                 <span>暗色</span>
                             </button>
                         </div>
@@ -172,13 +298,20 @@ const Settings: React.FC = () => {
                         </div>
                         <div className="settings-about">
                             <p>
-                                这是一个 AI 辅助开发的面试 Demo 项目，展示了完整的全栈开发能力，
-                                包括前端 React 应用、后端 FastAPI 服务、向量数据库集成和多模型 AI 支持。
+                                Knowledge Keeper 是一个智能知识管理工具，帮助你收集、整理和检索知识。
+                                支持网页收藏、笔记记录、文件上传，并通过 AI 自动生成摘要和标签。
+                                基于向量搜索实现语义检索，让你的知识触手可及。
                             </p>
                             <div className="settings-about__links">
-                                <a href="#" className="settings-about__link">
+                                <a
+                                    href="https://github.com/zoglmk/knowledge-keeper"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="settings-about__link"
+                                >
                                     <Github size={18} />
-                                    查看源码
+                                    GitHub
+                                    <ExternalLink size={14} />
                                 </a>
                             </div>
                         </div>
@@ -190,4 +323,3 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
-
