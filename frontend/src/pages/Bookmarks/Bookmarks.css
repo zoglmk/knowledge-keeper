@@ -1,0 +1,625 @@
+/**
+ * 收藏页面样式
+ */
+
+.bookmarks-page {
+    padding: var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 头部 */
+.bookmarks-page__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-xl);
+}
+
+.bookmarks-page__title-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.bookmarks-page__title-section h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.bookmarks-page__count {
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.bookmarks-page__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.bookmarks-page__pending {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    color: var(--color-primary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* 筛选栏 */
+.bookmarks-page__filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.bookmarks-page__search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+}
+
+.bookmarks-page__search input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.bookmarks-page__search input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.bookmarks-page__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.bookmarks-page__tags .tag {
+    cursor: pointer;
+}
+
+.bookmarks-page__tags .tag--active {
+    background: rgba(99, 102, 241, 0.3);
+    color: var(--color-primary-light);
+}
+
+/* 收藏卡片网格 */
+.bookmarks-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+}
+
+/* 加载状态 */
+.bookmarks-page__loading {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl);
+    color: var(--color-text-secondary);
+}
+
+/* 空状态 */
+.bookmarks-page__empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl);
+    background: var(--color-bg-card);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-muted);
+}
+
+.bookmarks-page__empty h3 {
+    color: var(--color-text-primary);
+}
+
+/* 收藏卡片 */
+.bookmark-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: all var(--transition-normal);
+    animation: fadeIn 0.3s ease;
+}
+
+.bookmark-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-lg);
+}
+
+.bookmark-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.bookmark-card__type {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.bookmark-card__title-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.bookmark-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bookmark-card__url {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.bookmark-card__url:hover {
+    color: var(--color-primary);
+}
+
+.bookmark-card__menu {
+    position: relative;
+}
+
+.bookmark-card__dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 160px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+}
+
+.bookmark-card__dropdown button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    text-align: left;
+}
+
+.bookmark-card__dropdown button:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.bookmark-card__dropdown-danger:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+/* 卡片加载状态 - 内联显示 */
+.bookmark-card__refreshing-inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    color: var(--color-primary);
+}
+
+.bookmark-card__summary {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.bookmark-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.bookmark-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.bookmark-card__date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--space-lg);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    width: 100%;
+    max-width: 520px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+}
+
+.modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal__header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal form {
+    padding: var(--space-lg);
+}
+
+.modal__type-tabs {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.modal__type-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.modal__type-tab:hover {
+    border-color: var(--color-border-hover);
+}
+
+.modal__type-tab--active {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.form-group .text-muted {
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.modal__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+}
+
+.modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
+/* 文件上传 */
+.file-upload {
+    position: relative;
+}
+
+.file-upload__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.file-upload__box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-xl);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.file-upload:hover .file-upload__box {
+    border-color: var(--color-primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.file-upload__name {
+    font-weight: 500;
+    color: var(--color-primary);
+}
+
+.file-upload__hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* 多文件列表 */
+.file-upload__list {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.file-upload__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+}
+
+.file-upload__item-name {
+    flex: 1;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-upload__item-size {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.file-upload__item-remove {
+    padding: 4px;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.file-upload__item-remove:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.file-upload__summary {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    padding-top: var(--space-sm);
+}
+
+.file-upload__progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-primary);
+    font-size: 0.875rem;
+}
+
+/* 详情弹窗 */
+.modal--large {
+    max-width: 700px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal--large .modal__header h2 {
+    font-size: 1.125rem;
+    flex: 1;
+    padding-right: var(--space-md);
+    /* 允许换行显示完整标题 */
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.modal__body {
+    padding: var(--space-lg);
+    overflow-y: auto;
+    flex: 1;
+}
+
+.bookmark-detail__url {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+    word-break: break-all;
+}
+
+.bookmark-detail__url:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+/* 标签区域 - 在顶部 */
+.bookmark-detail__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.bookmark-detail__section {
+    margin-bottom: var(--space-lg);
+}
+
+.bookmark-detail__section:first-of-type {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-lg);
+}
+
+.bookmark-detail__section h4 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.bookmark-detail__section p {
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+    line-height: 1.7;
+    padding: var(--space-md);
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-primary);
+}
+
+.bookmark-detail__content {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .bookmarks-page {
+        padding: var(--space-lg);
+    }
+
+    .bookmarks-page__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-md);
+    }
+
+    .bookmarks-page__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal--large {
+        max-width: 100%;
+        max-height: 90vh;
+    }
+}

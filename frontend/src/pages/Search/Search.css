@@ -1,0 +1,304 @@
+/**
+ * 搜索页面样式
+ */
+
+.search-page {
+    padding: var(--space-xl);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* 头部 */
+.search-page__header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+}
+
+.search-page__header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.search-page__header p {
+    color: var(--color-text-secondary);
+}
+
+/* 搜索表单 */
+.search-page__form {
+    margin-bottom: var(--space-xl);
+}
+
+.search-page__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.search-page__input-wrapper:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-page__input-wrapper svg {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.search-page__input-wrapper input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    outline: none;
+}
+
+.search-page__input-wrapper input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.search-page__clear {
+    padding: var(--space-xs);
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.search-page__clear:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+/* 筛选选项 */
+.search-page__filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-md);
+}
+
+.search-page__filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.search-page__filter-toggle input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+}
+
+.search-page__filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--color-text-muted);
+}
+
+.search-page__filter-group select {
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs) var(--space-md);
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+/* 结果区域 */
+.search-page__results {
+    min-height: 400px;
+}
+
+.search-page__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl);
+    color: var(--color-text-secondary);
+}
+
+.search-page__empty,
+.search-page__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-2xl);
+    text-align: center;
+}
+
+.search-page__placeholder-icon {
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-card);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+}
+
+.search-page__empty svg,
+.search-page__placeholder svg {
+    color: var(--color-text-muted);
+}
+
+.search-page__empty h3,
+.search-page__placeholder h3 {
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+}
+
+.search-page__empty p,
+.search-page__placeholder p {
+    color: var(--color-text-secondary);
+}
+
+.search-page__tips {
+    margin-top: var(--space-lg);
+}
+
+.search-page__tip {
+    padding: var(--space-md);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+/* 结果列表 */
+.search-page__results-header {
+    margin-bottom: var(--space-lg);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+}
+
+.search-page__results-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* 结果卡片 */
+.result-card {
+    padding: var(--space-lg);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+    animation: fadeIn 0.3s ease;
+}
+
+.result-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+}
+
+.result-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.result-card__type {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.result-card__info {
+    flex: 1;
+    min-width: 0;
+}
+
+.result-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.result-card__url {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.result-card__url:hover {
+    color: var(--color-primary);
+}
+
+.result-card__relevance {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.result-card__relevance-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.result-card__relevance-label {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+.result-card__content {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+}
+
+.result-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .search-page {
+        padding: var(--space-lg);
+    }
+
+    .search-page__header h1 {
+        font-size: 1.5rem;
+    }
+
+    .search-page__filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

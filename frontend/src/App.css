@@ -1,0 +1,31 @@
+/**
+ * 主应用样式
+ */
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app__main {
+  flex: 1;
+  min-height: 100vh;
+  transition: margin-left var(--transition-normal);
+}
+
+.app__main--sidebar-open {
+  margin-left: 240px;
+}
+
+.app__main--sidebar-closed {
+  margin-left: 72px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+
+  .app__main--sidebar-open,
+  .app__main--sidebar-closed {
+    margin-left: 0;
+  }
+}
