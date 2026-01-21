@@ -116,9 +116,6 @@ const MessageBubble: React.FC<{
                                     onClick={() => onSourceClick?.(source)}
                                 >
                                     <span className="message__source-title">{source.title}</span>
-                                    <span className="message__source-relevance">
-                                        {Math.round(source.relevance * 100)}%
-                                    </span>
                                     {source.url && (
                                         <a
                                             href={source.url}
@@ -130,6 +127,9 @@ const MessageBubble: React.FC<{
                                             <ExternalLink size={12} />
                                         </a>
                                     )}
+                                    <span className="message__source-relevance">
+                                        {Math.round(source.relevance * 100)}%
+                                    </span>
                                 </div>
                             ))}
                         </div>

@@ -534,7 +534,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - var(--space-xl) * 2);
-    max-width: 800px;
+    max-width: 1000px;
     padding: 0;
     background: transparent;
     border: none;
