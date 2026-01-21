@@ -5,7 +5,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 import os
 import re
 
@@ -30,7 +30,7 @@ class ConfigUpdate(BaseModel):
 class ConfigResponse(BaseModel):
     """配置响应"""
     provider: str
-    has_api_key: bool  # 不返回实际密钥，只标记是否已配置
+    configured_providers: Dict[str, bool]  # 每个提供商的配置状态
     message: str
 
 
@@ -88,6 +88,21 @@ def update_env_file(key: str, value: str) -> bool:
     return True
 
 
+def get_configured_providers(config: dict) -> Dict[str, bool]:
+    """检查每个提供商是否已配置"""
+    result = {}
+    for provider_id, key_name in PROVIDER_KEY_MAP.items():
+        api_key = config.get(key_name, "")
+        # 检查是否有真实的 API Key（不是占位符）
+        is_configured = bool(
+            api_key and 
+            not api_key.startswith("your-") and 
+            len(api_key) > 10
+        )
+        result[provider_id] = is_configured
+    return result
+
+
 @router.get("", response_model=ConfigResponse)
 async def get_config():
     """
@@ -95,15 +110,11 @@ async def get_config():
     """
     config = read_env_file()
     provider = config.get("AI_PROVIDER", "doubao")
-    
-    # 检查当前提供商是否有 API Key
-    key_name = PROVIDER_KEY_MAP.get(provider, "DOUBAO_API_KEY")
-    api_key = config.get(key_name, "")
-    has_key = bool(api_key and api_key != f"your-{provider}-api-key")
+    configured = get_configured_providers(config)
     
     return ConfigResponse(
         provider=provider,
-        has_api_key=has_key,
+        configured_providers=configured,
         message="配置加载成功"
     )
 
@@ -122,7 +133,7 @@ async def update_config(data: ConfigUpdate):
     if provider not in PROVIDER_KEY_MAP:
         return ConfigResponse(
             provider=provider,
-            has_api_key=False,
+            configured_providers={},
             message=f"不支持的提供商: {provider}"
         )
     
@@ -133,8 +144,13 @@ async def update_config(data: ConfigUpdate):
     key_name = PROVIDER_KEY_MAP[provider]
     update_env_file(key_name, api_key)
     
+    # 重新读取配置状态
+    config = read_env_file()
+    configured = get_configured_providers(config)
+    
     return ConfigResponse(
         provider=provider,
-        has_api_key=bool(api_key),
+        configured_providers=configured,
         message="配置已保存！请重启后端服务使配置生效。"
     )
+

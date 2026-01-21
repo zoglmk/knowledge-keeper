@@ -50,7 +50,7 @@ const Settings: React.FC = () => {
     const [apiKey, setApiKey] = useState('');
     const [showApiKey, setShowApiKey] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [hasApiKey, setHasApiKey] = useState(false);
+    const [configuredProviders, setConfiguredProviders] = useState<Record<string, boolean>>({});
 
     // 应用主题
     useEffect(() => {
@@ -74,7 +74,7 @@ const Settings: React.FC = () => {
         try {
             const response = await configApi.get();
             setSelectedProvider(response.provider);
-            setHasApiKey(response.has_api_key);
+            setConfiguredProviders(response.configured_providers || {});
         } catch (error) {
             // 使用默认值
         }
@@ -98,7 +98,7 @@ const Settings: React.FC = () => {
                 api_key: apiKey
             });
 
-            setHasApiKey(true);
+            setConfiguredProviders(response.configured_providers || {});
             setApiKey(''); // 清空输入框
             showNotification('success', response.message);
         } catch (error: any) {
@@ -107,6 +107,9 @@ const Settings: React.FC = () => {
             setSaving(false);
         }
     };
+
+    // 当前选中的提供商是否已配置
+    const isCurrentProviderConfigured = configuredProviders[selectedProvider] || false;
 
     return (
         <div className="settings-page">
@@ -151,7 +154,7 @@ const Settings: React.FC = () => {
                             <div className="settings-item__info">
                                 <span className="settings-item__label">
                                     API 密钥
-                                    {hasApiKey && (
+                                    {isCurrentProviderConfigured && (
                                         <span className="settings-badge settings-badge--success" style={{ marginLeft: '8px' }}>
                                             ✓ 已配置
                                         </span>
@@ -168,7 +171,7 @@ const Settings: React.FC = () => {
                                     type={showApiKey ? 'text' : 'password'}
                                     value={apiKey}
                                     onChange={(e) => setApiKey(e.target.value)}
-                                    placeholder={hasApiKey ? "输入新的 API Key 可覆盖..." : "请输入 API Key..."}
+                                    placeholder={isCurrentProviderConfigured ? "输入新的 API Key 可覆盖..." : "请输入 API Key..."}
                                 />
                                 <button
                                     type="button"

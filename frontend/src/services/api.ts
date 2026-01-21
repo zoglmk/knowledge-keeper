@@ -225,7 +225,7 @@ export const searchApi = {
 
 export interface ConfigResponse {
     provider: string;
-    has_api_key: boolean;
+    configured_providers: Record<string, boolean>;  // 每个提供商的配置状态
     message: string;
 }
 
