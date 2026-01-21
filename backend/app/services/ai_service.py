@@ -58,16 +58,29 @@ class OpenAICompatibleClient(BaseAIClient):
             data = response.json()
             return data["choices"][0]["message"]["content"]
     
-    async def chat_stream(self, messages: List[Dict]) -> AsyncGenerator[str, None]:
-        """流式聊天请求"""
+    async def chat_stream(self, messages: List[Dict], enable_thinking: bool = True) -> AsyncGenerator[Dict, None]:
+        """
+        流式聊天请求
+        
+        Args:
+            messages: 消息列表
+            enable_thinking: 是否启用思考模式（豆包等模型支持）
+        
+        Yields:
+            字典，包含 type（thinking/content）和 data
+        """
         url = f"{self.base_url}/chat/completions"
         payload = {
             "model": self.model,
             "messages": messages,
             "stream": True,
             "temperature": 0.7,
-            "max_tokens": 2000
+            "max_tokens": 4000
         }
+        
+        # 豆包思考模式支持
+        if enable_thinking and "doubao" in self.model.lower():
+            payload["thinking"] = {"type": "enabled"}
         
         async with httpx.AsyncClient(timeout=120.0) as client:
             async with client.stream("POST", url, headers=self.headers, json=payload) as response:
@@ -79,9 +92,18 @@ class OpenAICompatibleClient(BaseAIClient):
                             break
                         try:
                             data = json.loads(data_str)
-                            content = data["choices"][0].get("delta", {}).get("content", "")
+                            delta = data["choices"][0].get("delta", {})
+                            
+                            # 检查是否是思考内容
+                            reasoning = delta.get("reasoning_content", "")
+                            if reasoning:
+                                yield {"type": "thinking", "data": reasoning}
+                            
+                            # 正常内容
+                            content = delta.get("content", "")
                             if content:
-                                yield content
+                                yield {"type": "content", "data": content}
+                                
                         except json.JSONDecodeError:
                             continue
 

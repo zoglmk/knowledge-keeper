@@ -290,13 +290,21 @@ async def chat_stream(
         
         # 流式生成回复
         full_response = ""
+        full_thinking = ""
         async for chunk in rag_service.ai_service.chat_stream([
             {"role": "system", "content": system_prompt},
             *conversation_history,
             {"role": "user", "content": data.message}
         ]):
-            full_response += chunk
-            yield f"data: {json.dumps({'type': 'content', 'data': chunk})}\n\n"
+            chunk_type = chunk.get("type", "content")
+            chunk_data = chunk.get("data", "")
+            
+            if chunk_type == "thinking":
+                full_thinking += chunk_data
+                yield f"data: {json.dumps({'type': 'thinking', 'data': chunk_data})}\n\n"
+            else:
+                full_response += chunk_data
+                yield f"data: {json.dumps({'type': 'content', 'data': chunk_data})}\n\n"
         
         # 保存完整回复
         assistant_message = Message(

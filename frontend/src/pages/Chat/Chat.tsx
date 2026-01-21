@@ -21,6 +21,37 @@ import type { Conversation, Message, SourceReference } from '../../services/api'
 import { useChatStore, useAppStore } from '../../stores';
 import './Chat.css';
 
+// 思考过程展示组件（内嵌在消息中）
+const ThinkingBlock: React.FC<{
+    content: string;
+    isCollapsed: boolean;
+    isThinking: boolean;
+    onToggle: () => void;
+}> = ({ content, isCollapsed, isThinking, onToggle }) => {
+    if (!content) return null;
+
+    return (
+        <div className={`thinking-block ${isThinking ? 'thinking-block--active' : ''}`}>
+            <div className="thinking-block__header" onClick={onToggle}>
+                <span className="thinking-block__icon">
+                    {isThinking ? <Loader2 size={12} className="animate-spin" /> : '💭'}
+                </span>
+                <span className="thinking-block__title">
+                    {isThinking ? '思考中...' : '思考过程'}
+                </span>
+                <span className="thinking-block__toggle">
+                    {isCollapsed ? '▶' : '▼'}
+                </span>
+            </div>
+            {!isCollapsed && (
+                <div className="thinking-block__content">
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // 临时消息类型（用于流式输出）
 interface TempMessage {
     id: string;
@@ -36,7 +67,11 @@ const MessageBubble: React.FC<{
     sources?: SourceReference[];
     isStreaming?: boolean;
     onSourceClick?: (source: SourceReference) => void;
-}> = ({ message, sources, isStreaming, onSourceClick }) => {
+    thinkingContent?: string;
+    isThinking?: boolean;
+    thinkingCollapsed?: boolean;
+    onThinkingToggle?: () => void;
+}> = ({ message, sources, isStreaming, onSourceClick, thinkingContent, isThinking, thinkingCollapsed, onThinkingToggle }) => {
     const isUser = message.role === 'user';
 
     return (
@@ -45,6 +80,16 @@ const MessageBubble: React.FC<{
                 {isUser ? '👤' : <Sparkles size={20} />}
             </div>
             <div className="message__content">
+                {/* 思考过程（在回复内容之前） */}
+                {!isUser && thinkingContent && (
+                    <ThinkingBlock
+                        content={thinkingContent}
+                        isCollapsed={thinkingCollapsed || false}
+                        isThinking={isThinking || false}
+                        onToggle={onThinkingToggle || (() => { })}
+                    />
+                )}
+
                 <div className={`message__bubble ${isStreaming ? 'message__bubble--streaming' : ''}`}>
                     {isUser ? (
                         <p>{message.content}</p>
@@ -146,6 +191,10 @@ const Chat: React.FC = () => {
     const [selectedSource, setSelectedSource] = useState<SourceReference | null>(null);
     const [sourceDetail, setSourceDetail] = useState<any>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [thinkingContent, setThinkingContent] = useState('');  // 思考内容
+    const [isThinking, setIsThinking] = useState(false);  // 是否正在思考
+    const [thinkingCollapsed, setThinkingCollapsed] = useState(false);  // 思考内容是否折叠
+    const [lastAssistantMessageId, setLastAssistantMessageId] = useState<string | null>(null);  // 最后一条AI消息ID
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -247,6 +296,9 @@ const Chat: React.FC = () => {
             isStreaming: true,
         });
         setStreamSources([]);
+        setThinkingContent('');
+        setIsThinking(false);
+        setThinkingCollapsed(false);
 
         try {
             const response = await fetch('http://localhost:8000/api/chat/stream', {
@@ -292,19 +344,35 @@ const Chat: React.FC = () => {
                                         relevance: s.relevance,
                                         snippet: s.snippet,
                                     })));
+                                } else if (data.type === 'thinking') {
+                                    // 处理思考内容
+                                    setIsThinking(true);
+                                    setThinkingContent(prev => prev + data.data);
                                 } else if (data.type === 'content') {
+                                    // 收到正式内容时，折叠思考
+                                    if (isThinking) {
+                                        setIsThinking(false);
+                                        setThinkingCollapsed(true);
+                                    }
                                     setStreamingMessage(prev => prev ? {
                                         ...prev,
                                         content: prev.content + data.data,
                                     } : null);
                                 } else if (data.type === 'done') {
                                     // 流式输出完成，刷新对话
+                                    setThinkingCollapsed(true);
+                                    setIsThinking(false);
                                     if (conversationId) {
                                         const updated = await chatApi.getConversation(conversationId);
                                         if (!currentConversation) {
                                             addConversation(updated);
                                         }
                                         setCurrentConversation(updated);
+                                        // 记录最后一条AI消息ID（用于保留思考内容显示）
+                                        const lastMsg = updated.messages?.[updated.messages.length - 1];
+                                        if (lastMsg && lastMsg.role === 'assistant') {
+                                            setLastAssistantMessageId(lastMsg.id);
+                                        }
                                     }
                                 }
                             } catch (e) {
@@ -322,6 +390,7 @@ const Chat: React.FC = () => {
             setStreamingMessage(null);
             setPendingUserMessage(null);
             setStreamSources([]);
+            // 注意：不清空 thinkingContent，保留给下一次显示
         }
     };
 
@@ -403,20 +472,32 @@ const Chat: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            {displayMessages().map((msg) => (
-                                <MessageBubble
-                                    key={msg.id}
-                                    message={msg}
-                                    sources={'sources' in msg ? msg.sources || undefined : undefined}
-                                    onSourceClick={handleSourceClick}
-                                />
-                            ))}
+                            {displayMessages().map((msg) => {
+                                // 检查是否是最后一条AI消息（需要显示思考内容）
+                                const isLastAssistant = msg.id === lastAssistantMessageId && msg.role === 'assistant';
+                                return (
+                                    <MessageBubble
+                                        key={msg.id}
+                                        message={msg}
+                                        sources={'sources' in msg ? msg.sources || undefined : undefined}
+                                        onSourceClick={handleSourceClick}
+                                        thinkingContent={isLastAssistant ? thinkingContent : undefined}
+                                        isThinking={false}
+                                        thinkingCollapsed={thinkingCollapsed}
+                                        onThinkingToggle={() => setThinkingCollapsed(!thinkingCollapsed)}
+                                    />
+                                );
+                            })}
                             {streamingMessage && (
                                 <MessageBubble
                                     message={streamingMessage}
                                     sources={streamSources.length > 0 ? streamSources : undefined}
                                     isStreaming={true}
                                     onSourceClick={handleSourceClick}
+                                    thinkingContent={thinkingContent}
+                                    isThinking={isThinking}
+                                    thinkingCollapsed={thinkingCollapsed}
+                                    onThinkingToggle={() => setThinkingCollapsed(!thinkingCollapsed)}
                                 />
                             )}
                         </>

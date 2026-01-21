@@ -576,6 +576,68 @@
     cursor: not-allowed;
 }
 
+/* 思考过程组件（内嵌在消息中） */
+.thinking-block {
+    margin-bottom: var(--space-sm);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    font-size: 0.8125rem;
+}
+
+.thinking-block__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    cursor: pointer;
+    user-select: none;
+    background: var(--color-bg-secondary);
+    transition: background var(--transition-fast);
+}
+
+.thinking-block__header:hover {
+    background: var(--color-bg-hover);
+}
+
+.thinking-block__icon {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted);
+}
+
+.thinking-block__title {
+    flex: 1;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+}
+
+.thinking-block__toggle {
+    font-size: 0.625rem;
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+.thinking-block__content {
+    padding: var(--space-sm);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--color-bg-primary);
+}
+
+/* 思考中状态 - 无高度限制 */
+.thinking-block--active .thinking-block__content {
+    max-height: none;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
     .chat-page__sidebar {
