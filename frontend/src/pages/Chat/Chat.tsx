@@ -319,10 +319,11 @@ const Chat: React.FC = () => {
         setSourceDetail(null);
     };
 
-    const handleSendWithStream = async () => {
-        if (!inputMessage.trim() || isSending) return;
+    const handleSendWithStream = async (messageOverride?: string) => {
+        const messageToSend = messageOverride || inputMessage.trim();
+        if (!messageToSend || isSending) return;
 
-        const message = inputMessage.trim();
+        const message = messageToSend;
         setInputMessage('');
         setIsSending(true);
 
@@ -441,134 +442,7 @@ const Chat: React.FC = () => {
     // 快速发送建议问题（点击后直接发送）
     const handleQuickSend = (question: string) => {
         if (isSending) return;
-        setInputMessage(question);
-        // 使用 setTimeout 确保 state 更新后再发送
-        setTimeout(() => {
-            const message = question.trim();
-            if (!message) return;
-
-            setInputMessage('');
-            setIsSending(true);
-
-            // 立即显示用户消息
-            const userMsg: TempMessage = {
-                id: 'temp-user-' + Date.now(),
-                role: 'user',
-                content: message,
-            };
-            setPendingUserMessage(userMsg);
-
-            // 初始化流式消息
-            setStreamingMessage({
-                id: 'temp-assistant-' + Date.now(),
-                role: 'assistant',
-                content: '',
-                isStreaming: true,
-            });
-            setStreamSources([]);
-            setThinkingContent('');
-            setIsThinking(false);
-            setThinkingCollapsed(false);
-
-            // 发送请求（复用 handleSendWithStream 的逻辑）
-            doSendMessage(message);
-        }, 0);
-    };
-
-    // 实际发送消息的函数
-    const doSendMessage = async (message: string) => {
-        try {
-            const conversationId = currentConversation?.id;
-            const response = await fetch('http://localhost:8000/api/chat/stream', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message,
-                    conversation_id: conversationId,
-                    use_knowledge_base: useKnowledgeBase,
-                }),
-            });
-
-            if (!response.ok) throw new Error('请求失败');
-
-            const reader = response.body?.getReader();
-            if (!reader) throw new Error('无法获取响应流');
-
-            const decoder = new TextDecoder();
-            let buffer = '';
-            let fullContent = '';
-            let newConversationId = conversationId;
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop() || '';
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-                        if (data === '[DONE]') continue;
-
-                        try {
-                            const parsed = JSON.parse(data);
-
-                            if (parsed.conversation_id) {
-                                newConversationId = parsed.conversation_id;
-                            }
-
-                            if (parsed.type === 'thinking') {
-                                setIsThinking(true);
-                                setThinkingContent(prev => prev + (parsed.content || ''));
-                            } else if (parsed.type === 'content') {
-                                setIsThinking(false);
-                                setThinkingCollapsed(true);
-                                fullContent += parsed.content || '';
-                                setStreamingMessage(prev => prev ? {
-                                    ...prev,
-                                    content: fullContent,
-                                } : null);
-                            } else if (parsed.type === 'sources') {
-                                setStreamSources(parsed.sources || []);
-                            } else if (parsed.type === 'done') {
-                                if (newConversationId && newConversationId !== currentConversation?.id) {
-                                    const detail = await chatApi.getConversation(newConversationId);
-                                    setCurrentConversation(detail);
-                                    const convList = await chatApi.listConversations();
-                                    setConversations(convList.items);
-                                    if (detail.messages.length > 0) {
-                                        const lastMsg = detail.messages[detail.messages.length - 1];
-                                        if (lastMsg.role === 'assistant') {
-                                            setLastAssistantMessageId(lastMsg.id);
-                                        }
-                                    }
-                                } else if (currentConversation?.id) {
-                                    const detail = await chatApi.getConversation(currentConversation.id);
-                                    setCurrentConversation(detail);
-                                    if (detail.messages.length > 0) {
-                                        const lastMsg = detail.messages[detail.messages.length - 1];
-                                        if (lastMsg.role === 'assistant') {
-                                            setLastAssistantMessageId(lastMsg.id);
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (e) {
-                            // 忽略解析错误
-                        }
-                    }
-                }
-            }
-        } catch (error: any) {
-            showNotification('error', error?.message || '发送失败');
-        } finally {
-            setIsSending(false);
-            setStreamingMessage(null);
-            setPendingUserMessage(null);
-            setStreamSources([]);
-        }
+        handleSendWithStream(question);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -713,7 +587,7 @@ const Chat: React.FC = () => {
                         />
                         <button
                             className="chat-page__send-btn"
-                            onClick={handleSendWithStream}
+                            onClick={() => handleSendWithStream()}
                             disabled={!inputMessage.trim() || isSending}
                         >
                             {isSending ? (
