@@ -16,7 +16,7 @@
 }
 
 .sidebar--open {
-    width: 240px;
+    width: 260px;
 }
 
 .sidebar--closed {
@@ -27,8 +27,8 @@
 .sidebar__logo {
     display: flex;
     align-items: center;
-    gap: var(--space-md);
-    padding: var(--space-lg) var(--space-lg);
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-md);
     border-bottom: 1px solid var(--glass-border);
     position: relative;
 }
@@ -59,11 +59,10 @@
 }
 
 .sidebar__logo-text {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     color: var(--color-text-primary);
     white-space: nowrap;
-    overflow: hidden;
     letter-spacing: -0.01em;
     animation: fadeIn 0.3s ease;
 }

@@ -460,7 +460,7 @@ const BookmarkCard: React.FC<{
     return (
         <div className="bookmark-card" onClick={onClick} style={{ cursor: 'pointer' }}>
             <div className="bookmark-card__header">
-                <div className="bookmark-card__type">{getTypeIcon()}</div>
+                <div className={`bookmark-card__type bookmark-card__type--${bookmark.type === 'url' ? 'webpage' : bookmark.type}`}>{getTypeIcon()}</div>
                 <div className="bookmark-card__title-wrap">
                     <h3 className="bookmark-card__title">{bookmark.title}</h3>
                     {bookmark.url && (
