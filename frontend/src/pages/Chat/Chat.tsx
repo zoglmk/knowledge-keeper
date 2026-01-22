@@ -408,14 +408,11 @@ const Chat: React.FC = () => {
                                         content: prev.content + data.data,
                                     } : null);
                                 } else if (data.type === 'done') {
-                                    // 流式输出完成，刷新对话
+                                    // 流式输出完成，刷新当前对话内容
                                     setThinkingCollapsed(true);
                                     setIsThinking(false);
                                     if (conversationId) {
                                         const updated = await chatApi.getConversation(conversationId);
-                                        if (!currentConversation) {
-                                            addConversation(updated);
-                                        }
                                         setCurrentConversation(updated);
                                         // 记录最后一条AI消息ID（用于保留思考内容显示）
                                         const lastMsg = updated.messages?.[updated.messages.length - 1];
