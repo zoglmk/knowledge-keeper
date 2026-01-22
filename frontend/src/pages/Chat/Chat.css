@@ -730,8 +730,21 @@
 
 /* 移动端响应式 */
 @media (max-width: 768px) {
+    .chat-page {
+        flex-direction: column;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+
     .chat-page__sidebar {
         display: none;
+    }
+
+    .chat-page__main {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
     }
 
     .chat-page__messages {
@@ -772,20 +785,71 @@
     .chat-page__suggestions {
         flex-direction: column;
         gap: var(--space-sm);
+        width: 100%;
+        padding: 0 var(--space-md);
     }
 
     .chat-page__suggestions button {
         min-height: 44px;
         font-size: var(--text-sm);
         -webkit-tap-highlight-color: transparent;
+        text-align: left;
+        white-space: normal;
+        word-break: break-word;
     }
 
     /* 欢迎区域 */
     .chat-page__welcome {
-        padding: var(--space-lg);
+        padding: var(--space-lg) var(--space-md);
+        max-width: 100%;
     }
 
     .chat-page__welcome h2 {
         font-size: var(--text-xl);
     }
+
+    /* 移动端新对话浮动按钮 */
+    .chat-page__mobile-new-btn {
+        display: flex;
+        position: fixed;
+        top: calc(56px + var(--space-md));
+        right: var(--space-md);
+        width: 48px;
+        height: 48px;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        z-index: 50;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .chat-page__mobile-new-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* 消息气泡最大宽度 */
+    .message__bubble {
+        max-width: calc(100vw - 80px);
+        word-break: break-word;
+    }
+
+    /* 来源参考卡片 */
+    .message__sources {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .message__source-card {
+        min-width: 200px;
+        flex-shrink: 0;
+    }
+}
+
+/* 桌面端隐藏移动端新对话按钮 */
+.chat-page__mobile-new-btn {
+    display: none;
 }

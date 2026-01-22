@@ -28,7 +28,8 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-    sidebarOpen: true,
+    // 移动端默认关闭侧边栏
+    sidebarOpen: typeof window !== 'undefined' ? window.innerWidth > 768 : true,
     setSidebarOpen: (open) => set({ sidebarOpen: open }),
     toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 

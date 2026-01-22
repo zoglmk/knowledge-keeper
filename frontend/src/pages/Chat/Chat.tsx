@@ -501,6 +501,15 @@ const Chat: React.FC = () => {
 
             {/* 聊天主区域 */}
             <main className="chat-page__main">
+                {/* 移动端新对话按钮 */}
+                <button
+                    className="chat-page__mobile-new-btn"
+                    onClick={handleNewConversation}
+                    title="新对话"
+                >
+                    <Plus size={20} />
+                </button>
+
                 {/* 消息列表 */}
                 <div className="chat-page__messages">
                     {displayMessages().length === 0 && !streamingMessage ? (
