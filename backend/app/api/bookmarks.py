@@ -292,11 +292,11 @@ async def delete_bookmark(
     bookmark_id: str,
     db: AsyncSession = Depends(get_db)
 ):
-    """删除收藏（软删除）"""
+    """删除收藏（软删除）并清理无用标签"""
     query = select(Bookmark).where(
         Bookmark.id == bookmark_id,
         Bookmark.is_active == True
-    )
+    ).options(selectinload(Bookmark.tags))
     
     result = await db.execute(query)
     bookmark = result.scalar_one_or_none()
@@ -304,9 +304,39 @@ async def delete_bookmark(
     if not bookmark:
         raise HTTPException(status_code=404, detail="收藏不存在")
     
-    # 软删除
+    # 记录当前收藏的标签 ID，用于后续清理
+    tag_ids_to_check = [tag.id for tag in bookmark.tags]
+    
+    # 软删除 - 清除标签关联并标记为非活跃
+    bookmark.tags.clear()  # 先清除标签关联
     bookmark.is_active = False
     await db.commit()
+    
+    # 检查并删除不再被使用的标签
+    if tag_ids_to_check:
+        for tag_id in tag_ids_to_check:
+            # 检查这个标签是否还被其他活跃的收藏使用
+            usage_query = (
+                select(func.count(BookmarkTag.c.bookmark_id))
+                .select_from(BookmarkTag)
+                .join(Bookmark, BookmarkTag.c.bookmark_id == Bookmark.id)
+                .where(
+                    BookmarkTag.c.tag_id == tag_id,
+                    Bookmark.is_active == True
+                )
+            )
+            usage_result = await db.execute(usage_query)
+            usage_count = usage_result.scalar() or 0
+            
+            # 如果没有其他收藏使用这个标签，则删除它
+            if usage_count == 0:
+                tag_query = select(Tag).where(Tag.id == tag_id)
+                tag_result = await db.execute(tag_query)
+                tag = tag_result.scalar_one_or_none()
+                if tag:
+                    await db.delete(tag)
+        
+        await db.commit()
     
     # 从向量库删除
     try:
