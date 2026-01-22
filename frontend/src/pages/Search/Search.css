@@ -1,28 +1,31 @@
 /**
- * 搜索页面样式
+ * 搜索页面样式 - Premium Design
  */
 
 .search-page {
-    padding: var(--space-xl);
+    padding: var(--space-xl) var(--space-2xl);
     max-width: 900px;
     margin: 0 auto;
+    animation: fadeIn 0.4s ease-out;
 }
 
 /* 头部 */
 .search-page__header {
     text-align: center;
-    margin-bottom: var(--space-xl);
+    margin-bottom: var(--space-2xl);
 }
 
 .search-page__header h1 {
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: var(--text-3xl);
+    font-weight: 800;
     color: var(--color-text-primary);
     margin-bottom: var(--space-sm);
+    letter-spacing: -0.02em;
 }
 
 .search-page__header p {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
 }
 
 /* 搜索表单 */
@@ -34,16 +37,18 @@
     display: flex;
     align-items: center;
     gap: var(--space-md);
-    padding: var(--space-md);
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    transition: all var(--transition-fast);
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .search-page__input-wrapper:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--color-border-active);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), var(--shadow-glow-sm);
 }
 
 .search-page__input-wrapper svg {
@@ -56,7 +61,7 @@
     background: none;
     border: none;
     color: var(--color-text-primary);
-    font-size: 1rem;
+    font-size: var(--text-base);
     outline: none;
 }
 
@@ -88,7 +93,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     color: var(--color-text-secondary);
     cursor: pointer;
 }
@@ -107,12 +112,12 @@
 }
 
 .search-page__filter-group select {
-    background: var(--color-bg-tertiary);
-    border: 1px solid var(--color-border);
+    background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     padding: var(--space-xs) var(--space-md);
     color: var(--color-text-primary);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     cursor: pointer;
 }
 
@@ -127,7 +132,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-md);
-    padding: var(--space-2xl);
+    padding: var(--space-3xl);
     color: var(--color-text-secondary);
 }
 
@@ -137,36 +142,39 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-md);
-    padding: var(--space-2xl);
+    gap: var(--space-lg);
+    padding: var(--space-3xl);
     text-align: center;
 }
 
 .search-page__placeholder-icon {
-    width: 96px;
-    height: 96px;
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-bg-card);
-    border-radius: 50%;
-    color: var(--color-text-muted);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(34, 211, 238, 0.1) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-xl);
+    color: var(--color-primary-light);
+    box-shadow: var(--shadow-glow-sm);
 }
 
 .search-page__empty svg,
 .search-page__placeholder svg {
-    color: var(--color-text-muted);
+    color: var(--color-primary-light);
 }
 
 .search-page__empty h3,
 .search-page__placeholder h3 {
-    font-size: 1.25rem;
+    font-size: var(--text-lg);
+    font-weight: 600;
     color: var(--color-text-primary);
 }
 
 .search-page__empty p,
 .search-page__placeholder p {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
 }
 
 .search-page__tips {
@@ -186,28 +194,43 @@
 .search-page__results-header {
     margin-bottom: var(--space-lg);
     color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
 }
 
 .search-page__results-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-lg);
 }
 
-/* 结果卡片 */
+/* 结果卡片 - Glassmorphism */
 .result-card {
-    padding: var(--space-lg);
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    position: relative;
+    padding: var(--space-xl);
+    background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
     transition: all var(--transition-normal);
     animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
 
 .result-card:hover {
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-active);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow-sm);
 }
 
 .result-card__header {
@@ -218,14 +241,15 @@
 }
 
 .result-card__type {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-bg-tertiary);
-    border-radius: var(--radius-sm);
-    color: var(--color-primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(34, 211, 238, 0.15) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--color-primary-light);
     flex-shrink: 0;
 }
 
@@ -235,7 +259,7 @@
 }
 
 .result-card__title {
-    font-size: 1rem;
+    font-size: var(--text-base);
     font-weight: 600;
     color: var(--color-text-primary);
     margin-bottom: var(--space-xs);
@@ -245,7 +269,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-xs);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     color: var(--color-text-muted);
 }
 
@@ -258,15 +282,16 @@
     flex-direction: column;
     align-items: center;
     padding: var(--space-sm) var(--space-md);
-    background: rgba(99, 102, 241, 0.1);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(34, 211, 238, 0.1) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.2);
     border-radius: var(--radius-md);
     flex-shrink: 0;
 }
 
 .result-card__relevance-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-primary);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    color: var(--color-primary-light);
 }
 
 .result-card__relevance-label {
@@ -275,9 +300,9 @@
 }
 
 .result-card__content {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     color: var(--color-text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: var(--space-md);
 }
 
