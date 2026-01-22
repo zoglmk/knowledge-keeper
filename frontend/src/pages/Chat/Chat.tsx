@@ -195,12 +195,14 @@ const Chat: React.FC = () => {
     const [isThinking, setIsThinking] = useState(false);  // 是否正在思考
     const [thinkingCollapsed, setThinkingCollapsed] = useState(false);  // 思考内容是否折叠
     const [lastAssistantMessageId, setLastAssistantMessageId] = useState<string | null>(null);  // 最后一条AI消息ID
+    const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);  // 动态建议问题
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    // 加载对话列表
+    // 加载对话列表和建议问题
     useEffect(() => {
         loadConversations();
+        loadSuggestedQuestions();
     }, []);
 
     // 滚动到底部
@@ -219,6 +221,50 @@ const Chat: React.FC = () => {
             console.error('加载对话列表失败:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // 从知识库加载建议问题
+    const loadSuggestedQuestions = async () => {
+        try {
+            const res = await bookmarkApi.list({ page_size: 20 });
+            const bookmarks = res.items;
+
+            if (bookmarks.length === 0) {
+                // 没有收藏时使用默认问题
+                setSuggestedQuestions([
+                    '帮我总结一下最近收藏的内容',
+                    '我收藏了哪些关于编程的文章？',
+                    '根据我的笔记，解释一下...',
+                ]);
+                return;
+            }
+
+            // 随机选择几个收藏内容生成问题
+            const shuffled = [...bookmarks].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, 3);
+
+            const questions = selected.map(bookmark => {
+                const title = bookmark.title.length > 20
+                    ? bookmark.title.substring(0, 20) + '...'
+                    : bookmark.title;
+                const templates = [
+                    `帮我总结一下「${title}」的主要内容`,
+                    `关于「${title}」，有哪些关键要点？`,
+                    `请解读一下「${title}」这篇文章`,
+                    `「${title}」的核心观点是什么？`,
+                ];
+                return templates[Math.floor(Math.random() * templates.length)];
+            });
+
+            setSuggestedQuestions(questions);
+        } catch (error) {
+            console.error('加载建议问题失败:', error);
+            // 出错时使用默认问题
+            setSuggestedQuestions([
+                '帮我总结一下最近收藏的内容',
+                '我收藏了哪些关于编程的文章？',
+            ]);
         }
     };
 
@@ -392,6 +438,139 @@ const Chat: React.FC = () => {
         }
     };
 
+    // 快速发送建议问题（点击后直接发送）
+    const handleQuickSend = (question: string) => {
+        if (isSending) return;
+        setInputMessage(question);
+        // 使用 setTimeout 确保 state 更新后再发送
+        setTimeout(() => {
+            const message = question.trim();
+            if (!message) return;
+
+            setInputMessage('');
+            setIsSending(true);
+
+            // 立即显示用户消息
+            const userMsg: TempMessage = {
+                id: 'temp-user-' + Date.now(),
+                role: 'user',
+                content: message,
+            };
+            setPendingUserMessage(userMsg);
+
+            // 初始化流式消息
+            setStreamingMessage({
+                id: 'temp-assistant-' + Date.now(),
+                role: 'assistant',
+                content: '',
+                isStreaming: true,
+            });
+            setStreamSources([]);
+            setThinkingContent('');
+            setIsThinking(false);
+            setThinkingCollapsed(false);
+
+            // 发送请求（复用 handleSendWithStream 的逻辑）
+            doSendMessage(message);
+        }, 0);
+    };
+
+    // 实际发送消息的函数
+    const doSendMessage = async (message: string) => {
+        try {
+            const conversationId = currentConversation?.id;
+            const response = await fetch('http://localhost:8000/api/chat/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message,
+                    conversation_id: conversationId,
+                    use_knowledge_base: useKnowledgeBase,
+                }),
+            });
+
+            if (!response.ok) throw new Error('请求失败');
+
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error('无法获取响应流');
+
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let fullContent = '';
+            let newConversationId = conversationId;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+
+                        try {
+                            const parsed = JSON.parse(data);
+
+                            if (parsed.conversation_id) {
+                                newConversationId = parsed.conversation_id;
+                            }
+
+                            if (parsed.type === 'thinking') {
+                                setIsThinking(true);
+                                setThinkingContent(prev => prev + (parsed.content || ''));
+                            } else if (parsed.type === 'content') {
+                                setIsThinking(false);
+                                setThinkingCollapsed(true);
+                                fullContent += parsed.content || '';
+                                setStreamingMessage(prev => prev ? {
+                                    ...prev,
+                                    content: fullContent,
+                                } : null);
+                            } else if (parsed.type === 'sources') {
+                                setStreamSources(parsed.sources || []);
+                            } else if (parsed.type === 'done') {
+                                if (newConversationId && newConversationId !== currentConversation?.id) {
+                                    const detail = await chatApi.getConversation(newConversationId);
+                                    setCurrentConversation(detail);
+                                    const convList = await chatApi.listConversations();
+                                    setConversations(convList.items);
+                                    if (detail.messages.length > 0) {
+                                        const lastMsg = detail.messages[detail.messages.length - 1];
+                                        if (lastMsg.role === 'assistant') {
+                                            setLastAssistantMessageId(lastMsg.id);
+                                        }
+                                    }
+                                } else if (currentConversation?.id) {
+                                    const detail = await chatApi.getConversation(currentConversation.id);
+                                    setCurrentConversation(detail);
+                                    if (detail.messages.length > 0) {
+                                        const lastMsg = detail.messages[detail.messages.length - 1];
+                                        if (lastMsg.role === 'assistant') {
+                                            setLastAssistantMessageId(lastMsg.id);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+            }
+        } catch (error: any) {
+            showNotification('error', error?.message || '发送失败');
+        } finally {
+            setIsSending(false);
+            setStreamingMessage(null);
+            setPendingUserMessage(null);
+            setStreamSources([]);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -457,15 +636,15 @@ const Chat: React.FC = () => {
                             <h2>开始智能对话</h2>
                             <p>向你的知识库提问，AI 会基于你收藏的内容为你解答</p>
                             <div className="chat-page__suggestions">
-                                <button onClick={() => setInputMessage('帮我总结一下最近收藏的内容')}>
-                                    帮我总结一下最近收藏的内容
-                                </button>
-                                <button onClick={() => setInputMessage('我收藏了哪些关于编程的文章？')}>
-                                    我收藏了哪些关于编程的文章？
-                                </button>
-                                <button onClick={() => setInputMessage('根据我的笔记，解释一下...')}>
-                                    根据我的笔记，解释一下...
-                                </button>
+                                {suggestedQuestions.map((question, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleQuickSend(question)}
+                                        disabled={isSending}
+                                    >
+                                        {question}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     ) : (
