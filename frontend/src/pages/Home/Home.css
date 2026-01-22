@@ -460,17 +460,66 @@
     margin-bottom: var(--space-lg);
 }
 
-/* 响应式 */
+/* 移动端响应式 */
 @media (max-width: 768px) {
     .home {
-        padding: var(--space-lg);
+        padding: var(--space-md);
     }
 
     .home__hero-title {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
+    }
+
+    .home__hero-desc {
+        font-size: var(--text-sm);
     }
 
     .home__quick-actions {
         grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    /* 触摸优化：卡片 */
+    .home__action-card {
+        min-height: 60px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .home__action-card:active {
+        transform: scale(0.98);
+    }
+
+    /* 统计卡片 */
+    .home__stats {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .home__stat {
+        padding: var(--space-md);
+    }
+
+    .home__stat-value {
+        font-size: var(--text-2xl);
+    }
+
+    /* 内容分布 */
+    .home__chart-info {
+        gap: var(--space-xs);
+    }
+
+    /* 最近收藏 */
+    .home__recent-items {
+        gap: var(--space-sm);
+    }
+
+    .home__recent-item {
+        padding: var(--space-sm);
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .home__recent-item:active {
+        background: var(--color-bg-hover);
     }
 }

@@ -143,15 +143,39 @@
     border-color: var(--color-border-active);
 }
 
-/* 响应式 */
+/* 移动端响应式 */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
+        top: 56px;
+        /* 从顶部头部下方开始 */
+        z-index: 90;
     }
 
     .sidebar--open {
         transform: translateX(0);
         width: 280px;
         box-shadow: var(--shadow-xl);
+    }
+
+    .sidebar--closed {
+        transform: translateX(-100%);
+    }
+
+    /* 移动端折叠按钮隐藏 */
+    .sidebar__toggle {
+        display: none;
+    }
+
+    /* 触摸优化：增大点击区域 */
+    .sidebar__nav-item {
+        padding: var(--space-md);
+        min-height: 48px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sidebar__nav-item:active {
+        background: var(--color-bg-hover);
+        transform: scale(0.98);
     }
 }

@@ -312,18 +312,40 @@
     gap: var(--space-xs);
 }
 
-/* 响应式 */
+/* 移动端响应式 */
 @media (max-width: 768px) {
     .search-page {
-        padding: var(--space-lg);
+        padding: var(--space-md);
     }
 
     .search-page__header h1 {
-        font-size: 1.5rem;
+        font-size: var(--text-xl);
     }
 
     .search-page__filters {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: var(--space-sm);
+    }
+
+    .search-page__filters select {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    /* 搜索输入框 */
+    .search-page__input-wrapper input {
+        font-size: 16px;
+        min-height: 48px;
+        padding: var(--space-md);
+    }
+
+    /* 触摸优化：结果卡片 */
+    .search-result-card {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .search-result-card:active {
+        transform: scale(0.98);
     }
 }

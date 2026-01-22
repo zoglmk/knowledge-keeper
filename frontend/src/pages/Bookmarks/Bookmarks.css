@@ -692,10 +692,10 @@
     white-space: pre-wrap;
 }
 
-/* 响应式 */
+/* 移动端响应式 */
 @media (max-width: 768px) {
     .bookmarks-page {
-        padding: var(--space-lg);
+        padding: var(--space-md);
     }
 
     .bookmarks-page__header {
@@ -704,12 +704,64 @@
         gap: var(--space-md);
     }
 
-    .bookmarks-page__grid {
-        grid-template-columns: 1fr;
+    .bookmarks-page__header h1 {
+        font-size: var(--text-xl);
     }
 
+    .bookmarks-page__grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    /* 触摸优化：卡片 */
+    .bookmark-card {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .bookmark-card:active {
+        transform: scale(0.98);
+    }
+
+    /* 触摸优化：按钮 */
+    .bookmarks-page__add-btn {
+        min-height: 44px;
+        padding: var(--space-sm) var(--space-md);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 标签筛选 */
+    .bookmarks-page__filters {
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+
+    .bookmarks-page__filter-tag {
+        min-height: 36px;
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--text-xs);
+    }
+
+    /* 搜索框 */
+    .bookmarks-page__search input {
+        font-size: 16px;
+        /* 防止 iOS 缩放 */
+        min-height: 44px;
+    }
+
+    /* 弹窗 */
     .modal--large {
         max-width: 100%;
-        max-height: 90vh;
+        max-height: 85vh;
+        margin: var(--space-md);
+        border-radius: var(--radius-lg);
+    }
+
+    .modal__actions {
+        flex-direction: column;
+    }
+
+    .modal__actions button {
+        width: 100%;
+        min-height: 44px;
     }
 }

@@ -5,6 +5,7 @@
 import React, { useEffect } from 'react';
 import { useAppStore } from './stores';
 import Sidebar from './components/Sidebar';
+import { MobileHeader, MobileBottomNav, MobileOverlay } from './components/MobileNav';
 import Notification from './components/Notification';
 import Home from './pages/Home';
 import Bookmarks from './pages/Bookmarks';
@@ -23,7 +24,7 @@ const pages: Record<string, React.FC> = {
 };
 
 function App() {
-  const { currentView, sidebarOpen } = useAppStore();
+  const { currentView, sidebarOpen, setSidebarOpen } = useAppStore();
 
   // 初始化主题
   useEffect(() => {
@@ -33,11 +34,28 @@ function App() {
     }
   }, []);
 
+  // 监听窗口大小变化，移动端自动关闭侧边栏
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768 && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen, setSidebarOpen]);
+
   // 获取当前页面组件
   const CurrentPage = pages[currentView] || Home;
 
   return (
     <div className="app">
+      {/* 移动端顶部头部 */}
+      <MobileHeader />
+
+      {/* 移动端遮罩层 */}
+      <MobileOverlay />
+
       {/* 侧边栏 */}
       <Sidebar />
 
@@ -45,6 +63,9 @@ function App() {
       <main className={`app__main ${sidebarOpen ? 'app__main--sidebar-open' : 'app__main--sidebar-closed'}`}>
         <CurrentPage />
       </main>
+
+      {/* 移动端底部导航 */}
+      <MobileBottomNav />
 
       {/* 全局通知 */}
       <Notification />

@@ -21,11 +21,15 @@
   margin-left: 72px;
 }
 
-/* 响应式 */
+/* 移动端响应式 */
 @media (max-width: 768px) {
 
   .app__main--sidebar-open,
   .app__main--sidebar-closed {
     margin-left: 0;
+    /* 顶部留出头部空间，底部留出导航空间 */
+    padding-top: 56px;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    min-height: 100vh;
   }
 }
