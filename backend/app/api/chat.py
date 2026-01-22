@@ -231,14 +231,15 @@ async def chat_stream(
         db.add(conversation)
         await db.flush()
     
-    # 保存用户消息
+    # 保存用户消息并提交，使对话立即出现在列表中
     user_message = Message(
         conversation_id=conversation.id,
         role=MessageRole.USER,
         content=data.message
     )
     db.add(user_message)
-    await db.flush()
+    await db.commit()  # 立即提交，对话会出现在列表中
+    await db.refresh(conversation)  # 刷新获取最新状态
     
     async def generate():
         rag_service = get_rag_service()

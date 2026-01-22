@@ -383,6 +383,10 @@ const Chat: React.FC = () => {
 
                                 if (data.type === 'conversation_id') {
                                     conversationId = data.data;
+                                    // 立即刷新对话列表，使新对话出现
+                                    chatApi.listConversations().then(res => {
+                                        setConversations(res.items);
+                                    });
                                 } else if (data.type === 'sources') {
                                     setStreamSources(data.data.map((s: any) => ({
                                         bookmark_id: s.bookmark_id,
