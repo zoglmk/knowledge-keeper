@@ -5,6 +5,7 @@
 
 import httpx
 import re
+import json
 from typing import Optional, Dict
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
@@ -36,8 +37,146 @@ class WebScraper:
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
     }
     
+    # X/Twitter 相关的域名模式
+    TWITTER_DOMAINS = ['twitter.com', 'x.com', 'mobile.twitter.com', 'mobile.x.com']
+    
     def __init__(self, timeout: float = 30.0):
         self.timeout = timeout
+    
+    def _is_twitter_url(self, url: str) -> bool:
+        """检查是否是 X/Twitter 链接"""
+        parsed = urlparse(url)
+        return any(domain in parsed.netloc for domain in self.TWITTER_DOMAINS)
+    
+    def _extract_tweet_id(self, url: str) -> Optional[str]:
+        """从 URL 提取推文 ID"""
+        # 匹配 /status/123456789 格式
+        match = re.search(r'/status/(\d+)', url)
+        return match.group(1) if match else None
+    
+    def _extract_username(self, url: str) -> Optional[str]:
+        """从 URL 提取用户名"""
+        # 匹配 twitter.com/username 或 x.com/username
+        match = re.search(r'(?:twitter\.com|x\.com)/([^/\?]+)', url)
+        if match:
+            username = match.group(1)
+            # 排除特殊路径
+            if username not in ['home', 'search', 'explore', 'notifications', 'messages', 'i', 'settings']:
+                return username
+        return None
+    
+    async def _fetch_twitter_via_fxtwitter(self, url: str) -> Dict[str, Optional[str]]:
+        """
+        使用 FxTwitter/FixupX API 获取推文内容
+        FxTwitter 是一个免费的 Twitter 内容代理服务
+        """
+        tweet_id = self._extract_tweet_id(url)
+        username = self._extract_username(url)
+        
+        if not tweet_id or not username:
+            return {'title': None, 'content': None, 'description': None, 'error': '无法解析推文 ID'}
+        
+        # 使用 FxTwitter API
+        api_url = f"https://api.fxtwitter.com/{username}/status/{tweet_id}"
+        
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(api_url)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    tweet = data.get('tweet', {})
+                    
+                    author_name = tweet.get('author', {}).get('name', username)
+                    author_handle = tweet.get('author', {}).get('screen_name', username)
+                    text = tweet.get('text', '')
+                    created_at = tweet.get('created_at', '')
+                    
+                    # 构建标题
+                    title = f"{author_name} (@{author_handle}) 的推文"
+                    
+                    # 构建完整内容
+                    content_parts = [text]
+                    
+                    # 添加日期信息
+                    if created_at:
+                        content_parts.append(f"\n发布时间: {created_at}")
+                    
+                    # 如果有媒体，添加媒体描述
+                    media = tweet.get('media', {})
+                    if media:
+                        photos = media.get('photos', [])
+                        videos = media.get('videos', [])
+                        if photos:
+                            content_parts.append(f"\n[包含 {len(photos)} 张图片]")
+                        if videos:
+                            content_parts.append(f"\n[包含 {len(videos)} 个视频]")
+                    
+                    return {
+                        'title': title,
+                        'content': '\n'.join(content_parts),
+                        'description': text[:200] if text else None,
+                        'error': None
+                    }
+                else:
+                    # API 失败，尝试 Nitter
+                    return await self._fetch_twitter_via_nitter(url, username, tweet_id)
+                    
+        except Exception as e:
+            # 出错时尝试 Nitter 备用方案
+            return await self._fetch_twitter_via_nitter(url, username, tweet_id)
+    
+    async def _fetch_twitter_via_nitter(self, original_url: str, username: str, tweet_id: str) -> Dict[str, Optional[str]]:
+        """
+        使用 Nitter 实例获取推文内容（备用方案）
+        Nitter 是 Twitter 的开源前端，不需要 JavaScript
+        """
+        # 多个 Nitter 实例，按顺序尝试
+        nitter_instances = [
+            'nitter.net',
+            'nitter.privacydev.net',
+            'nitter.poast.org',
+        ]
+        
+        for instance in nitter_instances:
+            nitter_url = f"https://{instance}/{username}/status/{tweet_id}"
+            
+            try:
+                async with httpx.AsyncClient(
+                    timeout=15.0,
+                    follow_redirects=True,
+                    headers=self.HEADERS
+                ) as client:
+                    response = await client.get(nitter_url)
+                    
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        
+                        # 提取推文内容
+                        tweet_content = soup.select_one('.tweet-content')
+                        tweet_text = tweet_content.get_text(strip=True) if tweet_content else None
+                        
+                        # 提取用户名
+                        fullname = soup.select_one('.fullname')
+                        author_name = fullname.get_text(strip=True) if fullname else username
+                        
+                        if tweet_text:
+                            return {
+                                'title': f"{author_name} 的推文",
+                                'content': tweet_text,
+                                'description': tweet_text[:200] if tweet_text else None,
+                                'error': None
+                            }
+            except:
+                continue
+        
+        # 所有方案都失败
+        return {
+            'title': f"X 推文 - {tweet_id}",
+            'content': None,
+            'description': f"推文链接: {original_url}",
+            'error': 'X/Twitter 内容需要登录或 JavaScript 才能访问。建议手动复制推文内容。'
+        }
     
     async def fetch(self, url: str) -> Dict[str, Optional[str]]:
         """
@@ -49,6 +188,10 @@ class WebScraper:
         Returns:
             包含 title, content, description 的字典
         """
+        # 特殊处理 X/Twitter 链接
+        if self._is_twitter_url(url):
+            return await self._fetch_twitter_via_fxtwitter(url)
+        
         try:
             async with httpx.AsyncClient(
                 timeout=self.timeout,
