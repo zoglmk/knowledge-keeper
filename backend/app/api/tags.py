@@ -121,3 +121,53 @@ async def delete_tag(
     await db.commit()
     
     return {"message": "删除成功"}
+
+
+@router.delete("")
+async def cleanup_unused_tags(
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    清理无用标签
+    
+    删除所有未被活跃收藏使用的标签
+    """
+    from ..models.bookmark import Bookmark
+    
+    # 找出所有未被使用的标签
+    # 1. 获取所有标签 ID
+    all_tags_query = select(Tag)
+    all_tags_result = await db.execute(all_tags_query)
+    all_tags = all_tags_result.scalars().all()
+    
+    deleted_count = 0
+    deleted_names = []
+    
+    for tag in all_tags:
+        # 检查这个标签是否被活跃的收藏使用
+        usage_query = (
+            select(func.count(BookmarkTag.c.bookmark_id))
+            .select_from(BookmarkTag)
+            .join(Bookmark, BookmarkTag.c.bookmark_id == Bookmark.id)
+            .where(
+                BookmarkTag.c.tag_id == tag.id,
+                Bookmark.is_active == True
+            )
+        )
+        usage_result = await db.execute(usage_query)
+        usage_count = usage_result.scalar() or 0
+        
+        # 如果没有活跃收藏使用这个标签，删除它
+        if usage_count == 0:
+            deleted_names.append(tag.name)
+            await db.delete(tag)
+            deleted_count += 1
+    
+    await db.commit()
+    
+    return {
+        "message": f"已清理 {deleted_count} 个无用标签",
+        "deleted_count": deleted_count,
+        "deleted_tags": deleted_names
+    }
+
