@@ -12,15 +12,24 @@ import Bookmarks from './pages/Bookmarks';
 import Chat from './pages/Chat';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
+import { hasLocalWechat } from './localModules';
+// 直接导入本地公众号模块（如果存在）
+import Wechat from './local/Wechat';
 import './App.css';
 
-// 页面映射
-const pages: Record<string, React.FC> = {
+// 基础页面映射
+const basePages: Record<string, React.FC> = {
   home: Home,
   bookmarks: Bookmarks,
   chat: Chat,
   search: Search,
   settings: Settings,
+};
+
+// 合并页面映射（包含本地模块）
+const pages: Record<string, React.FC> = {
+  ...basePages,
+  ...(hasLocalWechat ? { wechat: Wechat } : {}),
 };
 
 function App() {
@@ -74,3 +83,4 @@ function App() {
 }
 
 export default App;
+

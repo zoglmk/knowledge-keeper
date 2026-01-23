@@ -13,8 +13,8 @@ interface AppState {
     setSidebarOpen: (open: boolean) => void;
     toggleSidebar: () => void;
 
-    // 当前视图
-    currentView: 'home' | 'bookmarks' | 'chat' | 'search' | 'settings';
+    // 当前视图（包含基础视图和本地私有视图）
+    currentView: 'home' | 'bookmarks' | 'chat' | 'search' | 'settings' | 'wechat';
     setCurrentView: (view: AppState['currentView']) => void;
 
     // 加载状态

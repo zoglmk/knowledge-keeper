@@ -12,18 +12,28 @@ import {
     ChevronLeft,
     ChevronRight,
     Sparkles,
+    QrCode,
 } from 'lucide-react';
 import { useAppStore } from '../../stores';
+import { hasLocalWechat } from '../../localModules';
 import './Sidebar.css';
 
-// 导航菜单项
-const navItems = [
+// 基础导航菜单项
+const baseNavItems = [
     { id: 'home', label: '首页', icon: Home },
     { id: 'bookmarks', label: '收藏', icon: Bookmark },
     { id: 'chat', label: '智能问答', icon: MessageSquare },
     { id: 'search', label: '搜索', icon: Search },
     { id: 'settings', label: '设置', icon: Settings },
 ] as const;
+
+// 本地模块导航项（仅在本地模块存在时添加）
+const localNavItems = hasLocalWechat ? [
+    { id: 'wechat', label: '公众号', icon: QrCode },
+] : [];
+
+// 合并导航项
+const navItems = [...baseNavItems, ...localNavItems];
 
 const Sidebar: React.FC = () => {
     const { sidebarOpen, toggleSidebar, currentView, setCurrentView } = useAppStore();
@@ -54,6 +64,13 @@ const Sidebar: React.FC = () => {
                     </button>
                 ))}
             </nav>
+
+            {/* 本地模块分隔线（仅当有本地模块时显示） */}
+            {hasLocalWechat && sidebarOpen && (
+                <div className="sidebar__local-badge">
+                    <span>本地功能</span>
+                </div>
+            )}
 
             {/* 折叠按钮 */}
             <button className="sidebar__toggle" onClick={toggleSidebar}>

@@ -55,6 +55,22 @@ app.include_router(chat_router, prefix="/api")
 app.include_router(search_router, prefix="/api")
 app.include_router(config_router, prefix="/api")
 
+# ==================== 动态加载本地私有模块 ====================
+# 这些模块存放在 app/local/ 目录下，不会同步到 GitHub
+import os
+
+local_modules_path = os.path.join(os.path.dirname(__file__), "local")
+if os.path.exists(local_modules_path):
+    # 尝试加载微信公众号管理模块
+    try:
+        from .local.wechat import wechat_router
+        app.include_router(wechat_router, prefix="/api/wechat", tags=["微信公众号管理"])
+        print("✅ 已加载本地模块: 微信公众号管理 (/api/wechat)")
+    except ImportError as e:
+        print(f"⚠️ 微信公众号模块加载失败: {e}")
+    except Exception as e:
+        print(f"⚠️ 微信公众号模块加载异常: {e}")
+
 
 @app.get("/")
 async def root():
