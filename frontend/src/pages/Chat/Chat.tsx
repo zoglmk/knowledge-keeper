@@ -28,6 +28,20 @@ const ThinkingBlock: React.FC<{
     isThinking: boolean;
     onToggle: () => void;
 }> = ({ content, isCollapsed, isThinking, onToggle }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    // 思考内容更新时自动滚动到底部
+    useEffect(() => {
+        if (contentRef.current && isThinking && !isCollapsed) {
+            // 使用 requestAnimationFrame 确保在 DOM 更新后滚动
+            requestAnimationFrame(() => {
+                if (contentRef.current) {
+                    contentRef.current.scrollTop = contentRef.current.scrollHeight;
+                }
+            });
+        }
+    }, [content, isThinking, isCollapsed]);
+
     if (!content) return null;
 
     return (
@@ -44,7 +58,7 @@ const ThinkingBlock: React.FC<{
                 </span>
             </div>
             <div className="thinking-block__content-wrapper">
-                <div className="thinking-block__content">
+                <div className="thinking-block__content" ref={contentRef}>
                     {content}
                 </div>
             </div>

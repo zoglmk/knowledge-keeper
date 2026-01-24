@@ -723,9 +723,10 @@
     overflow-y: auto;
 }
 
-/* 思考中状态 - 无高度限制 */
+/* 思考中状态 - 限制高度并允许滚动 */
 .thinking-block--active .thinking-block__content {
-    max-height: none;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 /* 移动端响应式 */
