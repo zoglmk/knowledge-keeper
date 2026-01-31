@@ -121,33 +121,82 @@ class VectorStore:
 class EmbeddingClient:
     """
     Embedding API 客户端
-    支持豆包多模态 embedding
+    支持多个提供商：OpenAI、豆包
     """
     
     def __init__(self):
-        self.api_key = settings.doubao_api_key
-        self.base_url = settings.doubao_base_url.rstrip('/')
-        self.model = settings.doubao_embedding_model
+        self.provider = settings.get_embedding_provider()
+        self.config = settings.get_embedding_config()
+        self.api_key = self.config.get("api_key", "")
+        self.base_url = self.config.get("base_url", "").rstrip('/')
+        self.model = self.config.get("model", "")
+        self.dimension = self.config.get("dimension", 1536)
+        
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
+        
+        print(f"📊 Embedding 服务初始化: provider={self.provider}, model={self.model}")
     
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """
         获取文本的向量嵌入
-        使用豆包多模态 embedding API
-        
-        Args:
-            texts: 文本列表
-        
-        Returns:
-            向量列表
+        根据配置的提供商调用不同的 API
         """
-        # 使用多模态 embedding 接口
-        url = f"{self.base_url}/embeddings/multimodal"
-        
+        if self.provider == "openai":
+            return await self._embed_openai(texts)
+        else:
+            return await self._embed_doubao(texts)
+    
+    async def _embed_openai(self, texts: List[str]) -> List[List[float]]:
+        """
+        使用 OpenAI 兼容的 embedding API
+        支持 OpenAI、DeepSeek 等兼容接口
+        """
+        url = f"{self.base_url}/embeddings"
         embeddings = []
+        
+        for text in texts:
+            payload = {
+                "model": self.model,
+                "input": text[:8000],  # OpenAI 支持更长的文本
+                "encoding_format": "float"
+            }
+            
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    response = await client.post(url, headers=self.headers, json=payload)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data.get('data') and len(data['data']) > 0:
+                            embedding = data['data'][0].get('embedding', [])
+                            if embedding:
+                                embeddings.append(embedding)
+                                print(f"✓ OpenAI 向量化成功，维度: {len(embedding)}")
+                            else:
+                                print(f"⚠ OpenAI 返回空 embedding")
+                                embeddings.append([])
+                        else:
+                            print(f"⚠ OpenAI 响应格式异常: {data}")
+                            embeddings.append([])
+                    else:
+                        print(f"✗ OpenAI Embedding 失败 - {response.status_code}: {response.text[:200]}")
+                        embeddings.append([])
+            except Exception as e:
+                print(f"✗ OpenAI Embedding 异常: {type(e).__name__}: {e}")
+                embeddings.append([])
+        
+        return embeddings
+    
+    async def _embed_doubao(self, texts: List[str]) -> List[List[float]]:
+        """
+        使用豆包多模态 embedding API
+        """
+        url = f"{self.base_url}/embeddings/multimodal"
+        embeddings = []
+        
         for text in texts:
             payload = {
                 "model": self.model,
@@ -165,41 +214,32 @@ class EmbeddingClient:
                     
                     if response.status_code == 200:
                         data = response.json()
-                        print(f"API 响应: {str(data)[:200]}...")  # 调试日志
                         
                         # 提取向量 - 支持多种格式
                         embedding = []
                         if data.get('data'):
                             data_field = data['data']
                             if isinstance(data_field, list) and len(data_field) > 0:
-                                # 列表格式: [{"embedding": [...]}]
                                 embedding = data_field[0].get('embedding', [])
                             elif isinstance(data_field, dict):
-                                # 字典格式: {"embedding": [...]}
                                 embedding = data_field.get('embedding', [])
                         elif data.get('embedding'):
-                            # 直接返回 embedding
                             embedding = data['embedding']
                         
                         if embedding:
                             embeddings.append(embedding)
-                            print(f"✓ 向量化成功，维度: {len(embedding)}")
+                            print(f"✓ 豆包向量化成功，维度: {len(embedding)}")
                         else:
-                            print(f"⚠ 向量化返回空 embedding，完整响应: {data}")
+                            print(f"⚠ 豆包返回空 embedding，响应: {str(data)[:200]}")
                             embeddings.append([])
                     else:
-                        print(f"✗ Embedding API 失败 - 状态码: {response.status_code}, 响应: {response.text[:300]}")
+                        print(f"✗ 豆包 Embedding 失败 - {response.status_code}: {response.text[:200]}")
                         embeddings.append([])
-            except httpx.TimeoutException as e:
-                print(f"✗ Embedding API 超时: {e}")
-                embeddings.append([])
-            except httpx.RequestError as e:
-                print(f"✗ Embedding API 请求错误: {type(e).__name__}: {e}")
+            except httpx.TimeoutException:
+                print(f"✗ 豆包 Embedding 超时")
                 embeddings.append([])
             except Exception as e:
-                print(f"✗ Embedding API 调用异常: {type(e).__name__}: {e}")
-                import traceback
-                traceback.print_exc()
+                print(f"✗ 豆包 Embedding 异常: {type(e).__name__}: {e}")
                 embeddings.append([])
         
         return embeddings

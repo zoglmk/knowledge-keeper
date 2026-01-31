@@ -125,6 +125,25 @@ DOUBAO_API_KEY=your-api-key
 DOUBAO_MODEL=doubao-pro-4k
 ```
 
+### 向量化 (Embedding) 配置
+
+向量化用于语义搜索和 RAG 知识问答。支持自动跟随对话模型或独立配置：
+
+```env
+# 向量化服务提供商
+# auto: 自动根据 AI_PROVIDER 选择（推荐）
+# openai: 强制使用 OpenAI embedding
+# doubao: 强制使用豆包 embedding
+EMBEDDING_PROVIDER=auto
+
+# 自动模式规则：
+# - AI_PROVIDER=openai/deepseek -> 使用 OpenAI embedding
+# - AI_PROVIDER=doubao -> 使用豆包 embedding
+# - 其他 -> 优先豆包，无 key 则用 OpenAI
+```
+
+> **注意**: 如果你使用的模型提供商没有 embedding API（如 Claude、Gemini），需要额外配置豆包或 OpenAI 的 API Key 用于向量化。
+
 ## 📄 API 文档
 
 启动后端服务后，访问以下地址查看 API 文档:

@@ -51,9 +51,19 @@ class Settings(BaseSettings):
     app_port: int = 8000
     
     # 嵌入模型配置 (用于向量化)
+    # 支持: auto (跟随 ai_provider), openai, doubao
+    embedding_provider: Literal["auto", "openai", "doubao"] = "auto"
+    
+    # OpenAI embedding 配置
+    openai_embedding_model: str = "text-embedding-3-small"
+    openai_embedding_dimension: int = 1536
+    
     # 豆包多模态 embedding 模型
     doubao_embedding_model: str = "doubao-embedding-vision-250615"
-    embedding_dimension: int = 3072  # doubao-embedding-vision 维度
+    doubao_embedding_dimension: int = 3072
+    
+    # 默认 embedding 维度（根据实际使用的提供商动态调整）
+    embedding_dimension: int = 2048
     
     class Config:
         env_file = ".env"
@@ -89,6 +99,59 @@ class Settings(BaseSettings):
             },
         }
         return provider_configs.get(self.ai_provider, {})
+    
+    def get_embedding_provider(self) -> str:
+        """
+        获取实际使用的 embedding 提供商
+        如果配置为 auto，则根据 ai_provider 自动选择
+        """
+        if self.embedding_provider == "auto":
+            # 根据对话模型选择 embedding 提供商
+            # OpenAI 和 DeepSeek 使用 OpenAI 兼容的 embedding API
+            # 其他使用豆包
+            if self.ai_provider in ["openai", "deepseek"]:
+                return "openai"
+            elif self.ai_provider == "doubao":
+                return "doubao"
+            else:
+                # Gemini, Claude 等没有独立的 embedding API，使用豆包
+                # 如果没有配置豆包 key，回退到 OpenAI
+                if self.doubao_api_key:
+                    return "doubao"
+                elif self.openai_api_key:
+                    return "openai"
+                else:
+                    return "doubao"  # 默认
+        return self.embedding_provider
+    
+    def get_embedding_config(self) -> dict:
+        """获取 embedding 配置"""
+        provider = self.get_embedding_provider()
+        
+        if provider == "openai":
+            # OpenAI 兼容的 embedding (包括 DeepSeek)
+            if self.ai_provider == "deepseek":
+                return {
+                    "api_key": self.deepseek_api_key,
+                    "base_url": self.deepseek_base_url,
+                    "model": "text-embedding-ada-002",  # DeepSeek 可能不支持，会回退
+                    "dimension": self.openai_embedding_dimension,
+                }
+            else:
+                return {
+                    "api_key": self.openai_api_key,
+                    "base_url": self.openai_base_url,
+                    "model": self.openai_embedding_model,
+                    "dimension": self.openai_embedding_dimension,
+                }
+        else:
+            # 豆包
+            return {
+                "api_key": self.doubao_api_key,
+                "base_url": self.doubao_base_url,
+                "model": self.doubao_embedding_model,
+                "dimension": self.doubao_embedding_dimension,
+            }
 
 
 @lru_cache()
