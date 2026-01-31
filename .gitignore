@@ -55,3 +55,7 @@ htmlcov/
 # Python 虚拟环境
 pip-log.txt
 pip-delete-this-directory.txt
+
+# 本地私有模块 (不同步到 GitHub)
+frontend/src/local/
+backend/app/local/
