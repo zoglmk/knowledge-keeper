@@ -70,6 +70,16 @@ if os.path.exists(local_modules_path):
         print(f"⚠️ 微信公众号模块加载失败: {e}")
     except Exception as e:
         print(f"⚠️ 微信公众号模块加载异常: {e}")
+    
+    # 尝试加载 AI 创作模块
+    try:
+        from .local.create import router as create_router
+        app.include_router(create_router, prefix="/api/local", tags=["AI 创作"])
+        print("✅ 已加载本地模块: AI 创作 (/api/local/create)")
+    except ImportError as e:
+        print(f"⚠️ AI 创作模块加载失败: {e}")
+    except Exception as e:
+        print(f"⚠️ AI 创作模块加载异常: {e}")
 
 
 @app.get("/")

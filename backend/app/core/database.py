@@ -45,6 +45,18 @@ async def get_db():
 
 async def init_db():
     """初始化数据库，创建所有表"""
+    # 动态导入本地模块的模型（如果存在）
+    import os
+    local_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "local")
+    if os.path.exists(local_path):
+        try:
+            from ..local.create.models import Creation, CreationTemplate
+            print("  └ 已加载创作模块模型")
+        except ImportError:
+            pass  # 模块不存在时跳过
+        except Exception as e:
+            print(f"  └ 创作模块模型加载失败: {e}")
+    
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

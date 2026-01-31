@@ -13,15 +13,18 @@ import {
     ChevronRight,
     Sparkles,
     QrCode,
+    PenTool,
 } from 'lucide-react';
 import { useAppStore } from '../../stores';
-import { hasLocalWechat } from '../../localModules';
+import { hasLocalWechat, hasLocalCreate } from '../../localModules';
 import './Sidebar.css';
 
 // 基础导航菜单项
 const baseNavItems = [
     { id: 'home', label: '首页', icon: Home },
     { id: 'bookmarks', label: '收藏', icon: Bookmark },
+    // 创作入口（仅本地）
+    ...(hasLocalCreate ? [{ id: 'create', label: '创作', icon: PenTool }] : []),
     { id: 'chat', label: '智能问答', icon: MessageSquare },
     { id: 'search', label: '搜索', icon: Search },
     { id: 'settings', label: '设置', icon: Settings },

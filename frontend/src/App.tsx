@@ -12,9 +12,11 @@ import Bookmarks from './pages/Bookmarks';
 import Chat from './pages/Chat';
 import Search from './pages/Search';
 import Settings from './pages/Settings';
-import { hasLocalWechat } from './localModules';
+import { hasLocalWechat, hasLocalCreate } from './localModules';
 // 直接导入本地公众号模块（如果存在）
 import Wechat from './local/Wechat';
+// 直接导入创作模块（如果存在）
+import { Create } from './local/Create';
 import './App.css';
 
 // 基础页面映射
@@ -30,6 +32,7 @@ const basePages: Record<string, React.FC> = {
 const pages: Record<string, React.FC> = {
   ...basePages,
   ...(hasLocalWechat ? { wechat: Wechat } : {}),
+  ...(hasLocalCreate ? { create: Create } : {}),
 };
 
 function App() {
